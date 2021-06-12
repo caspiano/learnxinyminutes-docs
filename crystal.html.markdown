@@ -4,6 +4,8 @@ filename: learncrystal.cr
 contributors:
     - ["Vitalii Elenhaupt", "http://veelenga.com"]
     - ["Arnaud Fernandés", "https://github.com/TechMagister/"]
+    - ["Caspian Baska", "https://github.com/caspiano/"]
+
 
 ---
 
@@ -91,6 +93,17 @@ s.object_id    #=> 142528472        : UInt64
 "This is
    multiline string"
 
+# Heredocs
+<<-STRING # => "This is\n  also a multiline string"
+  This is
+    also a multiline string
+  STRING
+
+# Heredocs are objects
+<<-STRING.downcase #=> "hi"
+Hi
+STRING
+
 # String with double quotes
 %(hello "world") #=> "hello \"world\""
 
@@ -106,6 +119,31 @@ sentence = :question?     # :"question?" : Symbol
 sentence == :question?    #=> true  : Bool
 sentence == :exclamation! #=> false : Bool
 sentence == "question?"   #=> false : Bool
+
+# Enums
+
+enum Go
+  StraightAhead
+  Left
+  Right         = -1
+end
+
+Go::Left.to_s #=> "Left"
+
+# Enums are value backed
+Go::StraightAhead.value #=> 0
+Go::Left.value          #=> 1
+Go::Right.value         #=> -1
+
+# `Enum#to_json` underscore cases the enum constant
+Go::StraightAhead.to_json #=> "straight_ahead"
+
+def vector(direction : Go)
+  direction.value
+end
+
+# Symbols are autocast to Enum members
+vector(:right) #=> -1
 
 # Arrays
 
@@ -277,6 +315,24 @@ action = case cmd
 end
 
 action #=> "Moving..."
+
+# Exhaustive Case statement
+direction = Go::StraightAhead
+
+# `case ... in` statements checks for full branch coverage.
+case direction
+in Go::StraightAhead then "s"
+in Go::Left          then "l"
+in Go::Right         then "r"
+end #=> "s"
+
+exhaustive_case_check : String | Int32 = "hello"
+
+# `case ... in` can ensure full branch coverage over types
+case exhaustive_case_check
+in String then "string"
+in In32   then "int32"
+end
 
 # Loops
 index = 0
